@@ -1,0 +1,86 @@
+## This script finds orphaned snapshots from a CSV file and creates JIRA tickets for each snapshot. Orphaned snapshots can add a lot of costs to bills if they aren't deleted in time!
+
+
+
+import pandas as pd
+import argparse
+from jira import JIRA
+import os
+
+def create_jira_ticket(jira_client, summary, description, project_key):
+    issue_dict = {
+        'project': {'key': project_key},
+        'summary': summary,
+        'description': description,
+        'issuetype': {'name': 'Task'},
+    }
+    try:
+        issue = jira_client.create_issue(fields=issue_dict)
+        print(f"Created JIRA ticket: {issue.key}")
+        return issue
+    except Exception as e:
+        print(f"Failed to create ticket: {e}")
+        return None
+
+def ticket_exists(jira_client, project_key, snapshot_id):
+    jql = f'project = {project_key} AND summary ~ "{snapshot_id}"'
+    try:
+        issues = jira_client.search_issues(jql)
+        return len(issues) > 0
+    except Exception as e:
+        print(f"Error checking for existing ticket: {e}")
+        return False
+
+def main(input_file, project_key):
+    try:
+        df = pd.read_csv(input_file)
+    except Exception as e:
+        print(f"Failed to read CSV file: {e}")
+        return
+
+    jira_url = os.getenv("JIRA_URL")
+    jira_email = os.getenv("JIRA_EMAIL")
+    jira_token = os.getenv("JIRA_API_TOKEN")
+
+    if not all([jira_url, jira_email, jira_token]):
+        raise EnvironmentError("Missing JIRA credentials in environment variables.")
+
+    try:
+        jira_client = JIRA(server=jira_url, basic_auth=(jira_email, jira_token))
+    except Exception as e:
+        print(f"Failed to connect to JIRA: {e}")
+        return
+
+    for _, row in df.iterrows():
+        snapshot_id = row.get("SnapshotId")
+        account_id = row.get("AccountId")
+        region = row.get("Region")
+        size = row.get("VolumeSize")
+
+        if not snapshot_id:
+            print("Missing SnapshotId in row, skipping.")
+            continue
+
+        summary = f"Orphaned Snapshot: {snapshot_id}"
+        description = (
+            f"The following orphaned snapshot was identified during the Bitbucket pipeline run:\n\n"
+            f"- Account ID: `{account_id}`\n"
+            f"- Snapshot ID: `{snapshot_id}`\n"
+            f"- Region: `{region}`\n"
+            f"- Volume Size: `{size}` GB\n\n"
+            f"Please review and delete if no longer needed."
+        )
+
+        if ticket_exists(jira_client, project_key, snapshot_id):
+            print(f"Ticket already exists for snapshot {snapshot_id}, skipping.")
+            continue
+
+        create_jira_ticket(jira_client, summary, description, project_key)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create JIRA tickets for orphaned snapshots")
+    parser.add_argument("input_file", help="CSV file containing snapshot data")
+    parser.add_argument("project_key", help="JIRA project key")
+    args = parser.parse_args()
+    
+    main(args.input_file, args.project_key)
