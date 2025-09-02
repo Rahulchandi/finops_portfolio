@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" version="28.1.0">
+  <diagram name="Page-1" id="cUAjLI4bJYRI1VXduhHs">
+    <mxGraphModel dx="786" dy="497" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ihRgrsHpanK0wnK5beb6-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-1" target="ihRgrsHpanK0wnK5beb6-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-1" value="" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/devops/Code_Optimization.svg;" vertex="1" parent="1">
+          <mxGeometry x="260" y="280" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-3" target="ihRgrsHpanK0wnK5beb6-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-3" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.s3;fillColor=#E05243;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="410" y="273.75" width="70" height="82.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-4" value="Cost optimization Hub" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="230" y="240" width="106" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-6" value="Parquet file" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="310" y="320" width="106" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-7" value="S3" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="392" y="240" width="106" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-8" target="ihRgrsHpanK0wnK5beb6-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-8" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.athena;fillColor=#F58534;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="610" y="276.75" width="76.5" height="76.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-9" value="Athena runs query and enrich results with account owner id/email" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="549.25" y="250" width="234.75" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-11" value="CSV to S3" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="675" y="450" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-12" target="ihRgrsHpanK0wnK5beb6-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-12" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.users.csv_file;" vertex="1" parent="1">
+          <mxGeometry x="619" y="460" width="59" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-14" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.s3;fillColor=#E05243;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="770.25" y="440" width="70" height="82.5" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-36" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-18" target="ihRgrsHpanK0wnK5beb6-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-18" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.lambda;fillColor=#F58534;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="990" y="439.88" width="70" height="81.12" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-19" value="" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.ses;fillColor=#D9A741;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1139" y="442.88" width="80" height="74.99" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-20" value="" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.document" vertex="1" parent="1">
+          <mxGeometry x="1005" y="570" width="40" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-21" value="CSV" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="593.38" y="503" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-23" value="Lambda triggered via S3 event notification" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="871.25" y="430" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-25" value="SES" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="410" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-31" value="Config file with account id/emails" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="973.13" y="630" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-32" value="" style="shape=actor;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1350" y="450" width="40" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-33" value="Account owner" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1308.13" y="414.01" width="103.75" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-14" target="ihRgrsHpanK0wnK5beb6-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ihRgrsHpanK0wnK5beb6-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ihRgrsHpanK0wnK5beb6-19" target="ihRgrsHpanK0wnK5beb6-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
