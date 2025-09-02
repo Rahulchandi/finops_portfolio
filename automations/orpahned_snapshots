@@ -4,6 +4,8 @@
 ## 1) requirements.txt file to install dependencies.
 ## 2) accounts.txt file with accounts you want to look over
 ## 3) pipeline file if running it via your CI/CD pipeline (optional)
+## - if you have a pipeline file, make sure to add a step that triggers the JIRA ticket creation after intall the requirements.txt and running the python file
+## - make sure to specify which project to add the ticket in
 ## 4) authentication method to access JIRA (API token, username/password, etc)
 ## 5) authentication method to access AWS (see below)
 
