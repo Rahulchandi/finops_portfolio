@@ -1,86 +1,168 @@
 ## This script finds orphaned snapshots from a CSV file and creates JIRA tickets for each snapshot. Orphaned snapshots can add a lot of costs to bills if they aren't deleted in time!
 
+## Dependencies: 
+## 1) requirements.txt file to install dependencies.
+## 2) accounts.txt file with accounts you want to look over
+## 3) pipeline file if running it via your CI/CD pipeline (optional)
+## 4) authentication method to access JIRA (API token, username/password, etc)
+## 5) authentication method to access AWS (see below)
 
-
-import pandas as pd
-import argparse
-from jira import JIRA
+import boto3
+import csv
 import os
+from botocore.exceptions import ClientError
+from botocore.config import Config
 
-def create_jira_ticket(jira_client, summary, description, project_key):
-    issue_dict = {
-        'project': {'key': project_key},
-        'summary': summary,
-        'description': description,
-        'issuetype': {'name': 'Task'},
-    }
+print("🚀 Starting orphaned snapshots scan...")
+print(f"📁 Current directory: {os.getcwd()}")
+print(f"📄 Files in directory: {os.listdir('.')}")
+
+# --- AWS Authentication ---
+# Please authenticate to AWS using your preferred method (e.g., environment variables, AWS config file, assumed role, etc.)
+# Example: export AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN (if needed)
+# Or use a profile: boto3.Session(profile_name="your-profile")
+# Or implement your own authentication logic below.
+
+# Example: Uncomment and edit as needed
+# session = boto3.Session(profile_name="your-profile")
+# Or just use the default session:
+session = boto3.Session()
+
+ROLE_SESSION_NAME = "build-session"
+ROLE_NAME = "YourRoleName"  # Update as needed
+
+# Read accounts.txt
+print("📋 Reading accounts.txt...")
+try:
+    with open("accounts.txt") as f:
+        raw_lines = [line.strip() for line in f if line.strip()]
+        accounts = []
+        for line in raw_lines:
+            parts = line.split(":")
+            if len(parts) != 2:
+                print(f"⚠️ Skipping malformed line: {line}")
+                continue
+            accounts.append(parts)
+    print(f"📋 Found {len(accounts)} accounts")
+except FileNotFoundError:
+    print("❌ accounts.txt not found")
+    raise
+
+output_file = "orphaned_snapshots.csv"
+print(f"📁 Writing results to: {os.path.abspath(output_file)}")
+
+# Write CSV header
+with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(["AccountId", "Region", "SnapshotId", "VolumeSize", "StartTime", "Description"])
+
+for account_name, account_number in accounts:
+    print(f"\n🔄 Processing {account_name} ({account_number})")
+
+    role_arn = f"arn:aws:iam::{account_number}:role/{ROLE_NAME}"
+    print(f"🔐 Assuming role: {role_arn}")
+
+    # --- AWS Role Assumption ---
+    # Replace the following block with your preferred authentication/role assumption logic.
+    # Example: Use sts:assume_role, or just use the default session if you have access.
+    sts_client = session.client("sts", config=Config(region_name="us-east-1"))
     try:
-        issue = jira_client.create_issue(fields=issue_dict)
-        print(f"Created JIRA ticket: {issue.key}")
-        return issue
-    except Exception as e:
-        print(f"Failed to create ticket: {e}")
-        return None
+        # Example: Uncomment and edit as needed for your authentication method
+        # creds = sts_client.assume_role(
+        #     RoleArn=role_arn,
+        #     RoleSessionName=ROLE_SESSION_NAME
+        # )["Credentials"]
 
-def ticket_exists(jira_client, project_key, snapshot_id):
-    jql = f'project = {project_key} AND summary ~ "{snapshot_id}"'
-    try:
-        issues = jira_client.search_issues(jql)
-        return len(issues) > 0
-    except Exception as e:
-        print(f"Error checking for existing ticket: {e}")
-        return False
+        # assumed_session = boto3.Session(
+        #     aws_access_key_id=creds["AccessKeyId"],
+        #     aws_secret_access_key=creds["SecretAccessKey"],
+        #     aws_session_token=creds["SessionToken"]
+        # )
 
-def main(input_file, project_key):
-    try:
-        df = pd.read_csv(input_file)
-    except Exception as e:
-        print(f"Failed to read CSV file: {e}")
-        return
+        # If not assuming a role, just use the default session:
+        assumed_session = session
 
-    jira_url = os.getenv("JIRA_URL")
-    jira_email = os.getenv("JIRA_EMAIL")
-    jira_token = os.getenv("JIRA_API_TOKEN")
+        ec2_client = assumed_session.client('ec2', region_name='us-east-1')
+        regions = [region['RegionName'] for region in ec2_client.describe_regions()['Regions']]
+        print(f"📍 Will check {len(regions)} regions")
 
-    if not all([jira_url, jira_email, jira_token]):
-        raise EnvironmentError("Missing JIRA credentials in environment variables.")
+        found_orphans = False
+        for region in regions:
+            print(f"🔍 Checking {account_number} in {region}...")
+            try:
+                ec2 = assumed_session.client('ec2', region_name=region)
 
-    try:
-        jira_client = JIRA(server=jira_url, basic_auth=(jira_email, jira_token))
-    except Exception as e:
-        print(f"Failed to connect to JIRA: {e}")
-        return
+                snapshots = []
+                paginator = ec2.get_paginator('describe_snapshots')
+                for page in paginator.paginate(OwnerIds=['self']):
+                    snapshots.extend(page['Snapshots'])
 
-    for _, row in df.iterrows():
-        snapshot_id = row.get("SnapshotId")
-        account_id = row.get("AccountId")
-        region = row.get("Region")
-        size = row.get("VolumeSize")
+                images = []
+                paginator = ec2.get_paginator('describe_images')
+                for page in paginator.paginate(Owners=['self']):
+                    images.extend(page['Images'])
 
-        if not snapshot_id:
-            print("Missing SnapshotId in row, skipping.")
-            continue
+                used_in_amis = {
+                    mapping['Ebs']['SnapshotId']
+                    for image in images
+                    for mapping in image.get('BlockDeviceMappings', [])
+                    if 'Ebs' in mapping and 'SnapshotId' in mapping['Ebs']
+                }
 
-        summary = f"Orphaned Snapshot: {snapshot_id}"
-        description = (
-            f"The following orphaned snapshot was identified during the Bitbucket pipeline run:\n\n"
-            f"- Account ID: `{account_id}`\n"
-            f"- Snapshot ID: `{snapshot_id}`\n"
-            f"- Region: `{region}`\n"
-            f"- Volume Size: `{size}` GB\n\n"
-            f"Please review and delete if no longer needed."
-        )
+                volumes = []
+                paginator = ec2.get_paginator('describe_volumes')
+                for page in paginator.paginate():
+                    volumes.extend(page['Volumes'])
 
-        if ticket_exists(jira_client, project_key, snapshot_id):
-            print(f"Ticket already exists for snapshot {snapshot_id}, skipping.")
-            continue
+                used_in_volumes = {
+                    volume['SnapshotId']
+                    for volume in volumes
+                    if 'SnapshotId' in volume
+                }
 
-        create_jira_ticket(jira_client, summary, description, project_key)
+                used_snapshot_ids = used_in_amis.union(used_in_volumes)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Create JIRA tickets for orphaned snapshots")
-    parser.add_argument("input_file", help="CSV file containing snapshot data")
-    parser.add_argument("project_key", help="JIRA project key")
-    args = parser.parse_args()
-    
-    main(args.input_file, args.project_key)
+                with open(output_file, mode='a', newline='', encoding='utf-8') as file:
+                    writer = csv.writer(file)
+                    for snapshot in snapshots:
+                        snapshot_id = snapshot['SnapshotId']
+                        if snapshot_id not in used_snapshot_ids:
+                            writer.writerow([
+                                account_number,
+                                region,
+                                snapshot_id,
+                                snapshot.get('VolumeSize', ''),
+                                snapshot.get('StartTime', ''),
+                                snapshot.get('Description', '')
+                            ])
+                            found_orphans = True
+            except ClientError as e:
+                print(f"⚠️ Failed to process region {region} for account {account_number}: {e}")
+
+        if found_orphans:
+            print(f"✅ Orphaned snapshots found in {account_number}")
+        else:
+            print(f"🎉 No orphaned snapshots found in {account_number}")
+
+    except ClientError as e:
+        print(f"❌ Failed to assume role for account {account_number}: {e}")
+
+# Final summary
+print("\n📊 Scan Summary:")
+if os.path.exists(output_file):
+    with open(output_file, 'r') as f:
+        lines = f.readlines()
+        print(f"📄 CSV file created with {len(lines)} lines (including header)")
+        if len(lines) > 1:
+            print(f"🔍 Found {len(lines) - 1} orphaned snapshots")
+            print("📋 First few entries:")
+            for i, line in enumerate(lines[:6]):
+                print(f"  {i}: {line.strip()}")
+        else:
+            print("🎉 No orphaned snapshots found")
+else:
+    print("❌ CSV file was not created")
+
+print(f"📁 Files in current directory: {os.listdir('.')}")
+
+print("🏁 Scan completed!")
